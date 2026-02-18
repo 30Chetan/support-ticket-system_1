@@ -2,137 +2,102 @@ import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
 const StatsDashboard = ({ refreshTrigger }) => {
-    const [stats, setStats] = useState(null);
-    const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
-    const fetchStats = useCallback(async () => {
-        try {
-            const response = await axios.get(`${API_URL}/api/tickets/stats/`);
-            setStats(response.data);
-        } catch (err) {
-            console.error("Error fetching stats:", err);
-        } finally {
-            setLoading(false);
-        }
-    }, [API_URL]);
+  const fetchStats = useCallback(async () => {
+    try {
+      const response = await axios.get(`${API_URL}/api/tickets/stats/`);
+      setStats(response.data);
+    } catch (err) {
+      console.error("Error fetching stats:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [API_URL]);
 
-    useEffect(() => {
-        fetchStats();
-    }, [fetchStats, refreshTrigger]);
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats, refreshTrigger]);
 
-    if (loading) return <div className="stats-loading">Loading stats...</div>;
-    if (!stats) return null;
+  if (loading) return (
+    <div className="flex justify-center p-8">
+      <div className="animate-pulse text-gray-500">Loading statistics...</div>
+    </div>
+  );
 
-    return (
-        <div className="dashboard">
-            <div className="stats-grid main-stats">
-                <div className="stat-card">
-                    <h3>Total Tickets</h3>
-                    <div className="value">{stats.total_tickets}</div>
-                </div>
-                <div className="stat-card">
-                    <h3>Open Tickets</h3>
-                    <div className="value">{stats.open_tickets}</div>
-                </div>
-                <div className="stat-card">
-                    <h3>Avg / Day</h3>
-                    <div className="value">{stats.avg_tickets_per_day}</div>
-                </div>
-            </div>
+  if (!stats) return null;
 
-            <div className="stats-grid breakdowns">
-                <div className="breakdown-card">
-                    <h3>Priority</h3>
-                    <div className="breakdown-list">
-                        {Object.entries(stats.priority_breakdown).map(([key, value]) => (
-                            <div key={key} className="breakdown-item">
-                                <span className={`label priority-${key}`}>{key}</span>
-                                <span className="count">{value}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                <div className="breakdown-card">
-                    <h3>Category</h3>
-                    <div className="breakdown-list">
-                        {Object.entries(stats.category_breakdown).map(([key, value]) => (
-                            <div key={key} className="breakdown-item">
-                                <span className="label">{key}</span>
-                                <span className="count">{value}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-
-            <style>{`
-        .dashboard {
-          margin-bottom: 2rem;
-        }
-        .stats-grid {
-          display: grid;
-          gap: 1rem;
-          margin-bottom: 1rem;
-        }
-        .main-stats {
-          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        }
-        .breakdowns {
-          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        }
-        .stat-card, .breakdown-card {
-          background: #333;
-          padding: 1rem;
-          border-radius: 8px;
-          text-align: center;
-        }
-        .stat-card h3 {
-          margin: 0 0 0.5rem 0;
-          font-size: 0.9rem;
-          color: #aaa;
-          text-transform: uppercase;
-          letter-spacing: 1px;
-        }
-        .stat-card .value {
-          font-size: 2rem;
-          font-weight: bold;
-          color: #fff;
-        }
-        .breakdown-card h3 {
-          margin-top: 0;
-          border-bottom: 1px solid #444;
-          padding-bottom: 0.5rem;
-          margin-bottom: 0.5rem;
-        }
-        .breakdown-list {
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
-        }
-        .breakdown-item {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          font-size: 0.9rem;
-        }
-        .breakdown-item .label {
-          text-transform: capitalize;
-        }
-        .priority-critical { color: #ff4444; }
-        .priority-high { color: #ffbb33; }
-        .priority-medium { color: #00C851; }
-        .priority-low { color: #33b5e5; }
-        .stats-loading {
-          text-align: center;
-          color: #666;
-          padding: 1rem;
-        }
-      `}</style>
+  return (
+    <div>
+      <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">Overview</h3>
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-3 mb-8">
+        <div className="overflow-hidden rounded-lg bg-white shadow">
+          <div className="px-4 py-5 sm:p-6">
+            <dt className="truncate text-sm font-medium text-gray-500">Total Tickets</dt>
+            <dd className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{stats.total_tickets}</dd>
+          </div>
         </div>
-    );
+        <div className="overflow-hidden rounded-lg bg-white shadow">
+          <div className="px-4 py-5 sm:p-6">
+            <dt className="truncate text-sm font-medium text-gray-500">Open Tickets</dt>
+            <dd className="mt-1 text-3xl font-semibold tracking-tight text-indigo-600">{stats.open_tickets}</dd>
+          </div>
+        </div>
+        <div className="overflow-hidden rounded-lg bg-white shadow">
+          <div className="px-4 py-5 sm:p-6">
+            <dt className="truncate text-sm font-medium text-gray-500">Avg Tickets / Day</dt>
+            <dd className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{stats.avg_tickets_per_day}</dd>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <div className="overflow-hidden rounded-lg bg-white shadow">
+          <div className="px-4 py-4 border-b border-gray-100 sm:px-6">
+            <h4 className="text-base font-semibold leading-6 text-gray-900">Priority Breakdown</h4>
+          </div>
+          <div className="px-4 py-5 sm:p-6">
+            <ul className="space-y-4">
+              {Object.entries(stats.priority_breakdown).map(([key, value]) => (
+                <li key={key} className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <span className={`inline-block h-2 w-2 rounded-full mr-2 
+                                            ${key === 'critical' ? 'bg-red-500' :
+                        key === 'high' ? 'bg-orange-400' :
+                          key === 'medium' ? 'bg-green-400' : 'bg-blue-400'}`}>
+                    </span>
+                    <span className="text-sm text-gray-600 capitalize">{key}</span>
+                  </div>
+                  <span className="text-sm font-medium text-gray-900">{value}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div className="overflow-hidden rounded-lg bg-white shadow">
+          <div className="px-4 py-4 border-b border-gray-100 sm:px-6">
+            <h4 className="text-base font-semibold leading-6 text-gray-900">Category Breakdown</h4>
+          </div>
+          <div className="px-4 py-5 sm:p-6">
+            <ul className="space-y-4">
+              {Object.entries(stats.category_breakdown).map(([key, value]) => (
+                <li key={key} className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600 capitalize">{key}</span>
+                  <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+                    {value}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default StatsDashboard;
